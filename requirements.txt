@@ -2,3 +2,4 @@ pandas
 ipykernel
 requests
 lxml
+rich

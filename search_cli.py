@@ -1,6 +1,8 @@
 import sys
 import pandas as pd
 from census_engine import CensusEngine
+from rich.console import Console
+from rich.table import Table
 
 def main():
     if len(sys.argv) < 2:
@@ -9,6 +11,7 @@ def main():
         sys.exit(1)
 
     search_term = sys.argv[1]
+    console = Console()
     
     try:
         # Initialize engine and load data
@@ -20,17 +23,24 @@ def main():
         
         # Print summary
         count = len(results)
-        print(f"\nFound {count} results for term: '{search_term}'\n")
+        console.print(f"\n[bold green]Found {count} results for term:[/bold green] [italic blue]'{search_term}'[/italic blue]\n")
         
         if count > 0:
-            # Display all columns. Using to_string() without explicit column selection.
-            # We also set the max width to handle long descriptions.
-            pd.set_option('display.max_colwidth', None)
-            pd.set_option('display.width', 1000)
-            print(results.to_string(index=False))
+            # Criando a tabela Rich
+            table = Table(show_header=True, header_style="bold magenta", border_style="dim")
+            
+            # Adiciona as colunas baseadas no DataFrame
+            for column in results.columns:
+                table.add_column(column)
+
+            # Adiciona as linhas (convertendo tudo para string para evitar erros)
+            for _, row in results.iterrows():
+                table.add_row(*[str(val) for val in row])
+
+            console.print(table)
         
     except Exception as e:
-        print(f"Error: {e}")
+        console.print(f"[bold red]Error:[/bold red] {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
